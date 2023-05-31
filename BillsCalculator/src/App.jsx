@@ -2,9 +2,9 @@ import * as React from 'react';
 import * as css from './App.css'
 
 export default function App() {
-    const [incomes, setIncomes] = React.useState([]);
-    const [costs, setCosts] = React.useState([]);
-    const [results, setResults] = React.useState([]);
+    const [incomes, setIncomes] = React.useState(JSON.parse(localStorage.getItem("incomes")).length > 0 ? JSON.parse(localStorage.getItem("incomes")) : []);
+    const [costs, setCosts] = React.useState(JSON.parse(localStorage.getItem("costs")).length > 0 ? JSON.parse(localStorage.getItem("costs")) : []);
+    const [results, setResults] = React.useState(JSON.parse(localStorage.getItem("results")).length > 0 ? JSON.parse(localStorage.getItem("results")) : []);
     const [splitRule, setSplitRule] = React.useState('even')
 
     function addIncome() {
@@ -149,6 +149,13 @@ export default function App() {
 
         setResults(results);
     }
+
+    window.addEventListener("beforeunload", (ev) =>
+    {
+        localStorage.setItem("incomes", JSON.stringify(incomes));
+        localStorage.setItem("costs", JSON.stringify(costs));
+        localStorage.setItem("results", JSON.stringify(results));
+    });
 
     return (
         <div>
