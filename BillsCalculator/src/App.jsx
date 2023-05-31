@@ -160,6 +160,23 @@ export default function App() {
     return (
         <div>
             <h1> Cost Split Calculator </h1>
+            <div>
+                <button onClick={() => {
+                    localStorage.setItem("incomes", JSON.stringify(incomes));
+                    localStorage.setItem("costs", JSON.stringify(costs));
+                    localStorage.setItem("results", JSON.stringify(results));
+                }}> Save </button>
+                <button onClick={() => {
+                    setResults(JSON.parse(localStorage.getItem("results")))
+                    setCosts(JSON.parse(localStorage.getItem("costs")))
+                    setIncomes(JSON.parse(localStorage.getItem("incomes")))
+                }}> Load </button>
+                <button onClick={() => {
+                    setResults([])
+                    setCosts([])
+                    setIncomes([])
+                }}> Clear </button>
+            </div>
             <fieldset>
                 <legend> <h2>Income{incomes.length > 1 ? 's' : ''}</h2> </legend>
                 <div className={'cards'}>
