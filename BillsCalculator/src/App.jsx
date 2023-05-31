@@ -4,22 +4,39 @@ import * as css from './App.css'
 export default function App() {
     const [incomes, setIncomes] = React.useState([]);
     const [costs, setCosts] = React.useState([]);
+    const [results, setResults] = React.useState([]);
+    const [splitRule, setSplitRule] = React.useState('even')
 
-
-    const pencil = () => {
-        return (
-            <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-edit" width="16" height="16"
-                 viewBox="0 0 24 24" stroke-width="1.5" stroke="#ffffff" fill="none" stroke-linecap="round"
-                 stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                <path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1"/>
-                <path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z"/>
-                <path d="M16 5l3 3"/>
-            </svg>
-        )
-    }
     function addIncome() {
-        setIncomes((prev) => [...prev, {label: 'New Income', amount: 0}]);
+        setIncomes((prev) => [...prev, {label: 'New Income', value: 1}]);
+    }
+
+    function updateIncomeLabel(e) {
+        const value = e.target.value
+        const i =  e.target.getAttribute("data-index");
+
+        setIncomes((prev) => {
+            const copy = [...prev];
+            copy[i] = {label: value, value: copy[i].value}
+            return copy
+        })
+    }
+
+    function updateIncomeValue(e) {
+        const value = e.target.value
+        const i =  e.target.getAttribute("data-index");
+
+        setIncomes((prev) => {
+            const copy = [...prev];
+            copy[i] = {label: copy[i].label, value: value}
+            return copy
+        })
+    }
+
+    function updateSplitRule(e) {
+        const value = e.target.id
+
+        setSplitRule(value)
     }
 
     function removeIncome(index) {
@@ -29,7 +46,30 @@ export default function App() {
     }
 
     function addCost() {
-        setCosts((prev) => [...prev, {label: 'New Cost', amount: 0}]);
+        setCosts((prev) => [...prev, {label: 'New Cost', value: 1}]);
+    }
+
+    function updateCostLabel(e) {
+        const value = e.target.value
+        const i =  e.target.getAttribute("data-index");
+
+        setCosts((prev) => {
+            const copy = [...prev];
+            copy[i] = {label: value, value: copy[i].value}
+            return copy
+        })
+    }
+
+    function updateCostValue(e) {
+        const value = e.target.value
+        const i =  e.target.getAttribute("data-index");
+
+        setCosts((prev) => {
+            const copy = [...prev];
+
+            copy[i] = {label: copy[i].label, value: value}
+            return copy
+        })
     }
 
     function removeCost(index) {
@@ -38,34 +78,76 @@ export default function App() {
         })]);
     }
 
+    function gcd(a, b)
+    {
+        if (a === 0) return b;
+        return gcd(b % a, a);
+    }
+
+    function findGCD(arr, n)
+    {
+        let result = arr[0];
+        for (let i = 1; i < n; i++)
+        {
+            result = gcd(arr[i], result);
+            if(result === 1) return 1;
+        }
+        return result;
+    }
+
     function calculate() {
-    //     Do stuff
+        let incomeTotal = 0;
+        let incomeValues = incomes.map((income) => {
+            return income.value
+        })
+        
+        incomeValues.forEach((income) => {
+            incomeTotal += parseInt(income,10)
+        })
 
-        // function updateTotals() {
-        //     const incomeTotal = parseInt(income1.value, 10) + parseInt(income2.value, 10)
-        //     const costsTotal = parseInt(rent.value, 10) + parseInt(bills.value, 10) + parseInt(food.value, 10) + parseInt(council_tax.value, 10)
-        //
-        //     const cd = (income1.value == 0) ? income2.value : gcd (income1.value, income2.value%income1.value);
-        //     const ratio = `${income1.value/cd}:${income2.value/cd}`
-        //     const u = (income1.value/cd)  + (income2.value/cd)
-        //
-        //     rent_1.value = Math.ceil((parseInt(rent.value)/u) * (parseInt(income1.value)/cd))
-        //     rent_2.value = Math.ceil((parseInt(rent.value)/u) * (parseInt(income2.value)/cd))
-        //
-        //     bills_1.value = Math.ceil((parseInt(bills.value)/u) * (parseInt(income1.value)/cd))
-        //     bills_2.value = Math.ceil((parseInt(bills.value)/u) * (parseInt(income2.value)/cd))
-        //
-        //     food_1.value = Math.ceil((parseInt(food.value)/u) * (parseInt(income1.value)/cd))
-        //     food_2.value = Math.ceil((parseInt(food.value)/u) * (parseInt(income2.value)/cd))
-        //
-        //     council_1.value = Math.ceil((parseInt(council_tax.value)/u) * (parseInt(income1.value)/cd))
-        //     council_2.value = Math.ceil((parseInt(council_tax.value)/u) * (parseInt(income2.value)/cd))
-        //
-        //     income_total.value = incomeTotal
-        //     costs_total.value = costsTotal
-        //
-        // }
+        let costsTotal = 0;
+        let costsValues = costs.map((cost) => {
+            return cost.value
+        })
 
+        costsValues.forEach((cost) => {
+            costsTotal += parseInt(cost,10)
+        })
+
+        let results = []
+
+        if (splitRule === 'ratio'){
+            const gcd = findGCD(incomeValues, incomeValues.length)
+            const ratio = incomeValues.map((income) => {
+                return income/gcd
+            }).join(':')
+
+            // Not sure if this math here is correct.
+            let unit = 0;
+            incomeValues.forEach((income) => {
+                unit += income/gcd;
+            })
+
+            incomes.forEach((income) => {
+                let split = []
+                costs.forEach((cost) => {
+                    split.push([cost.label, Math.ceil((parseInt(cost.value, 10)/unit)) * (parseInt(income.value, 10)/gcd)])
+                })
+                results.push([income.label, split])
+            })
+        }
+
+        if (splitRule === 'even'){
+            incomes.forEach((income) => {
+                let split = []
+                costs.forEach((cost) => {
+                    split.push([cost.label, Math.ceil((parseInt(cost.value, 10)/incomes.length))])
+                })
+                results.push([income.label, split])
+            })
+        }
+
+        setResults(results);
     }
 
     return (
@@ -79,14 +161,16 @@ export default function App() {
                         <fieldset key={`income-fieldset-${i}`}>
                             <legend>
                                 <div>
-                                <input id={`income-label-${income.label}`} key={`income-label${i}`}
-                                           defaultValue={income.label}>
+                                <input data-index={i} id={`income-label-${i}`} key={`income-label${i}`}
+                                           defaultValue={income.label} onChange={updateIncomeLabel}>
                                 </input>
                                 <button onClick={() => {removeIncome(i)}}> - </button>
                                 </div>
                             </legend>
                             <div>
-                                <input type={'number'} id={`income-amount-${income.label}`} key={`income-value${i}`} defaultValue={income.amount}></input>
+                                <input data-index={i} type={'number'} id={`income-value-${i}`} key={`income-value${i}`}
+                                       onChange={updateIncomeValue} defaultValue={income.value}>
+                                </input>
                             </div>
                         </fieldset>
                     );
@@ -107,14 +191,16 @@ export default function App() {
                         <fieldset key={`income-fieldset-${i}`}>
                             <legend>
                                 <div>
-                                    <input id="cost-label" key={`cost-label${i}`}
-                                           defaultValue={cost.label}>
+                                    <input data-index={i} id="cost-label" key={`cost-label-${i}`}
+                                           defaultValue={cost.label} onChange={updateCostLabel}>
                                     </input>
                                     <button onClick={() => {removeCost(i)}}> - </button>
                                 </div>
                             </legend>
                             <div>
-                                <input id="income-amount" key={`cost-value${i}`} defaultValue={cost.amount} onChange={updateCost}></input>
+                                <input data-index={i} id="income-amount" key={`cost-value-${i}`} defaultValue={cost.value}
+                                       onChange={updateCostValue}>
+                                </input>
                             </div>
                         </fieldset>
                     ))}
@@ -133,18 +219,42 @@ export default function App() {
                         <legend> <h3> Split </h3> </legend>
                         <div className={'column'}>
                             <div className={'column-rule'}>
-                                <input disabled={incomes.length < 2} type="radio" id="even" name="split-type" value="even"/>
+                                <input onChange={updateSplitRule} checked={splitRule === 'even'} disabled={incomes.length < 2} type="radio" id="even" name="split-type" value="even"/>
                                 <label htmlFor="even">Evenly</label>
                             </div>
 
                             <div className={'column-rule'}>
-                                <input disabled={incomes.length < 2} type="radio" id="ratio" name="split-type" value="ratio"/>
+                                <input onChange={updateSplitRule}  checked={splitRule === 'ratio'} disabled={incomes.length < 2} type="radio" id="ratio" name="split-type" value="ratio"/>
                                 <label htmlFor="ratio">Equally</label>
                             </div>
                         </div>
                     </fieldset>
             </fieldset>
+
             <button onClick={calculate} className={'calculate'} disabled={(incomes.length < 2) && (costs.length < 1)}> <h2>Calculate</h2> </button>
+
+            {results.length > 0 && (
+                <fieldset>
+                    <legend> <h2>Results</h2> </legend>
+                    <div className={'cards'}>
+                        {results.map((result) => {
+                            return (
+                            <fieldset key={result[0]}>
+                                <legend> <h3>{result[0]}</h3> </legend>
+                                {result[1].map((cost) => {
+                                    return (
+                                        <fieldset key={cost[0]}>
+                                            <legend> <h4>{cost[0]}</h4> </legend>
+                                            <input disabled value={cost[1]}/>
+                                        </fieldset>
+                                    )
+                                })}
+                            </fieldset>
+                            )
+                        })}
+                    </div>
+                </fieldset>
+            )}
         </div>
     );
 }
