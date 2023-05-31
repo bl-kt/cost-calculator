@@ -261,13 +261,13 @@ export default function App() {
                 <fieldset>
                     <legend> <h2>Results</h2> </legend>
                     <div className={'cards'}>
-                        {results.map((result) => {
+                        {results.map((result, i) => {
                             return (
-                            <fieldset key={result[0]}>
+                            <fieldset key={`${result[0]}-${i}`}>
                                 <legend> <h3>{result[0]}</h3> </legend>
-                                {result[1].map((cost) => {
+                                {result[1].map((cost, i) => {
                                     return (
-                                        <fieldset key={cost[0]}>
+                                        <fieldset key={`${cost[0]}-${i}`}>
                                             <legend> <h4>{cost[0]}</h4> </legend>
                                             <input disabled value={cost[1]}/>
                                         </fieldset>
